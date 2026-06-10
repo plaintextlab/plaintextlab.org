@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why I Write in Plain Text — plaintextlab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F8F8F5;
+      --surface:   #EFEFEB;
+      --border:    #DDDDD8;
+      --muted:     #888884;
+      --text:      #1A1A1A;
+      --accent:    #2563EB;
+      --accent-bg: #EEF3FF;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+      --radius:    4px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .site-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 48px 0 36px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .site-title {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .site-title .prompt { color: var(--accent); }
+
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 16px;
+      background: var(--accent);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink 1.1s step-start infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    nav a {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+
+    nav a:hover { color: var(--accent); }
+
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .breadcrumb a { color: var(--accent); }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* ── Post header ── */
+    .post-header {
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .post-cat-tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 2px;
+      background: var(--accent-bg);
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .post-title {
+      font-family: var(--mono);
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .post-meta span {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .post-meta .sep { color: var(--border); }
+
+    /* ── Article body ── */
+    article {
+      font-size: 15.5px;
+      line-height: 1.75;
+      color: #2A2A2A;
+    }
+
+    article p {
+      margin-bottom: 24px;
+    }
+
+    article h2 {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      margin: 40px 0 14px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    article h2::before {
+      content: '##';
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    article h3 {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      margin: 28px 0 10px;
+      color: var(--text);
+    }
+
+    article ul, article ol {
+      padding-left: 24px;
+      margin-bottom: 24px;
+    }
+
+    article li {
+      margin-bottom: 6px;
+    }
+
+    article a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    article blockquote {
+      margin: 28px 0;
+      padding: 16px 20px;
+      border-left: 3px solid var(--accent);
+      background: var(--surface);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+
+    article blockquote p {
+      margin: 0;
+      font-style: italic;
+      color: #444;
+    }
+
+    article pre, article code {
+      font-family: var(--mono);
+    }
+
+    article code {
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+
+    article pre {
+      background: #1A1A1A;
+      color: #E8E8E3;
+      padding: 20px 24px;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    article pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: inherit;
+    }
+
+    article hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 40px 0;
+    }
+
+    /* ── Post footer ── */
+    .post-footer {
+      margin-top: 56px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: 2px;
+    }
+
+    /* ── Nav between posts ── */
+    .post-nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .post-nav-link {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: border-color 0.15s;
+    }
+
+    .post-nav-link:hover { border-color: var(--accent); }
+
+    .post-nav-link.next { text-align: right; }
+
+    .nav-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .nav-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 72px;
+      padding: 32px 0 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .footer-brand span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      header { padding: 32px 0 24px; flex-direction: column; align-items: flex-start; gap: 12px; }
+      .post-title { font-size: 20px; }
+      .post-nav { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="site-wrap">
+
+    <!-- ── Header ── -->
+    <header>
+      <a href="../index.html" class="site-title">
+        <span class="prompt">~/</span>plaintextlab<span class="cursor"></span>
+      </a>
+      <nav>
+        <a href="../index.html">← all posts</a>
+      </nav>
+    </header>
+
+    <!-- ── Breadcrumb ── -->
+    <div class="breadcrumb">
+      <a href="../index.html">home</a>
+      <span>/</span>
+      <a href="#">tools</a>
+      <span>/</span>
+      <span>why-i-write-in-plain-text</span>
+    </div>
+
+    <!-- ── Post header ── -->
+    <div class="post-header">
+      <span class="post-cat-tag">Tools</span>
+      <h1 class="post-title">Why I Write in Plain Text</h1>
+      <div class="post-meta">
+        <span>08 Jun 2025</span>
+        <span class="sep">·</span>
+        <span>4 min read</span>
+        <span class="sep">·</span>
+        <span>plaintextlab</span>
+      </div>
+    </div>
+
+    <!-- ── Article ── -->
+    <article>
+      <p>
+        Every few years a new note-taking app arrives and promises to change how you think. It
+        has a beautiful interface, a novel metaphor — networked graphs, infinite canvases, AI
+        sidebars — and for a few weeks it genuinely feels like a new way of working. Then the
+        company raises a Series B, pivots, and your notes are locked inside a proprietary
+        database format you cannot read.
+      </p>
+
+      <p>
+        I have been through this cycle enough times that I stopped counting migrations. Evernote
+        to Notion to Obsidian to Roam and back again. Each time I moved, I lost formatting, lost
+        links, lost small things that mattered. The lesson I kept not learning: the format
+        <em>is</em> the durability.
+      </p>
+
+      <h2>The oldest format that still works</h2>
+
+      <p>
+        Plain text is not a compromise. It is a decision. A <code>.txt</code> file written in 1985
+        opens without ceremony on any machine made in the last forty years and every machine likely
+        to be made in the next forty. It has no vendor. It requires no subscription. It has no
+        schema that can be deprecated.
+      </p>
+
+      <p>
+        Every other format — even PDF, even HTML — makes assumptions about the rendering
+        environment. Plain text makes exactly one assumption: that the reader can decode ASCII or
+        UTF-8. That assumption has been continuously valid for longer than most of us have been
+        alive.
+      </p>
+
+      <blockquote>
+        <p>
+          "Worse is better" is one way to put it. Another: the most robust tool is the one that
+          can fail the least because it promises the least.
+        </p>
+      </blockquote>
+
+      <h2>The filesystem is already your database</h2>
+
+      <p>
+        The thing I kept rebuilding inside every app was a filing system. Notebooks, tags,
+        folders, workspaces. At some point I noticed I was recreating the directory tree —
+        badly, inside a walled garden, with extra steps.
+      </p>
+
+      <p>
+        With plain text, the filesystem <em>is</em> the database. Files are rows. Folders are
+        categories. The find command is your search. grep is your full-text index. A shell one-liner
+        can answer questions about your entire note archive in milliseconds.
+      </p>
+
+      <pre><code># Find every note that mentions a topic, sorted by date modified
+grep -rl "distributed systems" ~/notes | xargs ls -lt | head -20</code></pre>
+
+      <p>
+        No plugin required. No sync to wait for. No monthly fee.
+      </p>
+
+      <h2>Writing tools vs. thinking tools</h2>
+
+      <p>
+        There is a useful distinction between tools that help you write and tools that help you
+        think. Note-taking apps are sold as thinking tools — the graph view, the backlinks, the
+        AI that summarises your own notes back at you. In practice, most of the friction they
+        introduce is friction in the tool itself, not in the thinking.
+      </p>
+
+      <p>
+        A blank text file and a good editor have the lowest possible interface overhead. There is
+        nothing to click, nothing to configure, nothing between you and the sentence you are
+        trying to write. This is not minimalism as an aesthetic; it is minimalism as a
+        performance characteristic.
+      </p>
+
+      <h3>The tools I actually use</h3>
+
+      <ul>
+        <li><strong>Neovim</strong> — for everything from quick notes to long-form drafts</li>
+        <li><strong>fd + ripgrep</strong> — for finding and searching files quickly</li>
+        <li><strong>Git</strong> — version history for writing, not just code</li>
+        <li><strong>Pandoc</strong> — when I need to convert Markdown to anything else</li>
+      </ul>
+
+      <h2>The format is not the point</h2>
+
+      <p>
+        None of this is to say plain text is the only correct answer. Spreadsheets exist for
+        reasons. Diagrams need different tools. The argument is narrower: for prose — notes,
+        journal entries, drafts, research — text is almost certainly sufficient, and the cost of
+        switching away from it is almost always higher than it appears at the point of migration.
+      </p>
+
+      <p>
+        Start with the simplest format that works. Add complexity only when you can name
+        the specific problem it solves. And be suspicious of any tool that makes it easy to put
+        data in and hard to get it back out.
+      </p>
+
+      <hr />
+
+      <p>
+        If you want to see how this site is built, the source is on GitHub. It is, appropriately,
+        a folder of HTML files with a bit of JavaScript for the index. No build step. No
+        dependencies. Just files.
+      </p>
+    </article>
+
+    <!-- ── Post footer ── -->
+    <div class="post-footer">
+      <div class="tags">
+        <span class="tag">plain-text</span>
+        <span class="tag">tools</span>
+        <span class="tag">workflows</span>
+        <span class="tag">writing</span>
+      </div>
+
+      <div class="post-nav">
+        <div class="post-nav-link prev">
+          <div class="nav-label">← prev</div>
+          <div class="nav-title">CSS That Doesn't Fight You</div>
+        </div>
+        <a href="building-a-static-blog.html" class="post-nav-link next">
+          <div class="nav-label">next →</div>
+          <div class="nav-title">Building a Static Blog on GitHub Pages</div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <footer>
+      <div class="footer-brand"><span>~/</span>plaintextlab</div>
+      <div class="footer-links">
+        <a href="#">github</a>
+        <a href="#">twitter</a>
+        <a href="#">rss</a>
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>

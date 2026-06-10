@@ -1,16 +1,704 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Your Name</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>plaintextlab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: serif; max-width: 700px; margin: 2em auto; padding: 0 1em; }
-    a { color: #00e; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #F8F8F5;
+      --surface:   #EFEFEB;
+      --border:    #DDDDD8;
+      --muted:     #888884;
+      --text:      #1A1A1A;
+      --accent:    #2563EB;
+      --accent-bg: #EEF3FF;
+      --danger:    #DC2626;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', sans-serif;
+      --radius:    4px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Layout ── */
+    .site-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 48px 0 36px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 40px;
+    }
+
+    .site-title {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 8px;
+      text-decoration: none;
+    }
+
+    .site-title span.prompt {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 18px;
+      background: var(--accent);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: blink 1.1s step-start infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .site-desc {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    nav {
+      margin-top: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    nav a {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: color 0.15s;
+    }
+
+    nav a:hover, nav a.active { color: var(--accent); }
+
+    /* ── Search ── */
+    .search-bar {
+      position: relative;
+      margin-bottom: 32px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      font-family: var(--mono);
+      font-size: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-bar input::placeholder { color: var(--muted); }
+
+    .search-bar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    #search-count {
+      margin-top: 8px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      min-height: 16px;
+    }
+
+    /* ── Category Filter ── */
+    .category-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+
+    .cat-btn {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: all 0.12s;
+    }
+
+    .cat-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .cat-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Section heading ── */
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Post List ── */
+    #post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .post-item {
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px 24px;
+      align-items: start;
+      transition: background 0.1s;
+    }
+
+    .post-item:first-child { border-top: 1px solid var(--border); }
+
+    .post-item:hover .post-title { color: var(--accent); }
+
+    .post-title {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+      transition: color 0.15s;
+      line-height: 1.4;
+    }
+
+    .post-excerpt {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .post-cat {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    .post-date {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .post-readtime {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .post-right {
+      text-align: right;
+    }
+
+    .post-number {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--border);
+      font-weight: 600;
+    }
+
+    /* ── No results ── */
+    #no-results {
+      display: none;
+      padding: 40px 0;
+      text-align: center;
+    }
+
+    #no-results p {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    #no-results .no-res-label {
+      font-size: 11px;
+      color: var(--border);
+      margin-bottom: 8px;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .page-info {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .page-btn {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: var(--radius);
+      transition: all 0.12s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .page-btn.current {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 72px;
+      padding: 32px 0 40px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .footer-brand span { color: var(--accent); }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      transition: color 0.15s;
+    }
+
+    .footer-links a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      header { padding: 32px 0 24px; }
+      .site-title { font-size: 18px; }
+      .post-item { grid-template-columns: 1fr; }
+      .post-right { display: none; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <h1>Your Name</h1>
-  <p>Welcome to my site.</p>
-  <!-- your content -->
+  <div class="site-wrap">
+
+    <!-- ── Header ── -->
+    <header>
+      <a href="index.html" class="site-title">
+        <span class="prompt">~/</span>plaintextlab<span class="cursor"></span>
+      </a>
+      <p class="site-desc"># writing about code, tools, and the things in between</p>
+      <nav>
+        <a href="index.html" class="active">home</a>
+        <a href="#">about</a>
+        <a href="#">rss</a>
+      </nav>
+    </header>
+
+    <!-- ── Search ── -->
+    <div class="search-bar">
+      <span class="search-icon">/</span>
+      <input type="search" id="search-input" placeholder="search posts..." autocomplete="off" />
+    </div>
+    <div id="search-count"></div>
+
+    <!-- ── Category Filter ── -->
+    <div class="category-row" id="cat-row">
+      <button class="cat-btn active" data-cat="all">All</button>
+    </div>
+
+    <!-- ── Post list ── -->
+    <div class="section-label" id="posts-label">Posts</div>
+
+    <div id="post-list"></div>
+
+    <div id="no-results">
+      <p class="no-res-label">// 404</p>
+      <p>No posts match your search.</p>
+    </div>
+
+    <!-- ── Pagination ── -->
+    <div class="pagination" id="pagination"></div>
+
+    <!-- ── Footer ── -->
+    <footer>
+      <div class="footer-brand"><span>~/</span>plaintextlab</div>
+      <div class="footer-links">
+        <a href="#">github</a>
+        <a href="#">twitter</a>
+        <a href="#">rss</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // ── Post data ──────────────────────────────────────────────────
+    // To add a new post: push an object to this array.
+    const POSTS = [
+      {
+        title: "Why I Write in Plain Text",
+        excerpt: "Every note-taking app promises to change your life. After years of migrations and lost data, I went back to .txt files and never looked back.",
+        date: "2025-06-08",
+        category: "Tools",
+        readtime: "4 min",
+        slug: "posts/why-i-write-in-plain-text.html"
+      },
+      {
+        title: "Building a Static Blog on GitHub Pages",
+        excerpt: "No frameworks, no build step, no npm install. Just HTML, a bit of JavaScript, and a git push. Here's the full setup I use for this site.",
+        date: "2025-05-30",
+        category: "Web",
+        readtime: "6 min",
+        slug: "posts/building-a-static-blog.html"
+      },
+      {
+        title: "The Unix Philosophy, Revisited",
+        excerpt: "Write programs that do one thing well. Write programs that work together. After 50 years, this still reads like a manifesto for modern software.",
+        date: "2025-05-18",
+        category: "Essays",
+        readtime: "8 min",
+        slug: "#"
+      },
+      {
+        title: "My Terminal Setup in 2025",
+        excerpt: "A walkthrough of my shell config, prompt, aliases, and the handful of CLI tools I actually reach for every day.",
+        date: "2025-05-05",
+        category: "Tools",
+        readtime: "5 min",
+        slug: "#"
+      },
+      {
+        title: "Notes on Reading Technical Papers",
+        excerpt: "Most papers are written for reviewers, not readers. A few tactics that help me get through them without losing the thread.",
+        date: "2025-04-22",
+        category: "Essays",
+        readtime: "5 min",
+        slug: "#"
+      },
+      {
+        title: "grep, sed, awk: A Practical Refresher",
+        excerpt: "These three tools have been on every Unix system for decades. I keep forgetting the syntax. Here's the cheat-sheet I actually use.",
+        date: "2025-04-10",
+        category: "Code",
+        readtime: "7 min",
+        slug: "#"
+      },
+      {
+        title: "Against Complexity: A Case for Boring Tech",
+        excerpt: "The best stack is often the one you already understand. A short argument for choosing boring, predictable technology over whatever is new.",
+        date: "2025-03-29",
+        category: "Essays",
+        readtime: "6 min",
+        slug: "#"
+      },
+      {
+        title: "Writing a Tiny HTTP Server in Python",
+        excerpt: "Python's stdlib http.server is underrated. In under 60 lines you can build something surprisingly capable for local dev and tooling.",
+        date: "2025-03-14",
+        category: "Code",
+        readtime: "9 min",
+        slug: "#"
+      },
+      {
+        title: "On Taking Notes While Reading",
+        excerpt: "Reading without writing is like dreaming without sleeping. Some notes on my annotation system for books and articles.",
+        date: "2025-02-28",
+        category: "Essays",
+        readtime: "4 min",
+        slug: "#"
+      },
+      {
+        title: "rsync Is All You Need",
+        excerpt: "Before reaching for a cloud sync service, consider rsync. It's fast, scriptable, and you already have it. A practical guide.",
+        date: "2025-02-10",
+        category: "Tools",
+        readtime: "5 min",
+        slug: "#"
+      },
+      {
+        title: "A Short History of Markdown",
+        excerpt: "John Gruber published Markdown in 2004 to make writing for the web feel like writing email. Twenty years later it's everywhere — and still plain text.",
+        date: "2025-01-25",
+        category: "Web",
+        readtime: "6 min",
+        slug: "#"
+      },
+      {
+        title: "CSS That Doesn't Fight You",
+        excerpt: "A few layout patterns I keep coming back to: the stack, the cluster, the repel. No frameworks required.",
+        date: "2025-01-08",
+        category: "Web",
+        readtime: "7 min",
+        slug: "#"
+      },
+    ];
+
+    const POSTS_PER_PAGE = 6;
+
+    // ── State ──────────────────────────────────────────────────────
+    let currentPage    = 1;
+    let currentCat     = "all";
+    let currentSearch  = "";
+
+    // ── Build category list ────────────────────────────────────────
+    const cats = [...new Set(POSTS.map(p => p.category))].sort();
+    const catRow = document.getElementById("cat-row");
+    cats.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.className = "cat-btn";
+      btn.dataset.cat = cat;
+      btn.textContent = cat;
+      catRow.appendChild(btn);
+    });
+
+    // ── Helpers ────────────────────────────────────────────────────
+    function formatDate(iso) {
+      const d = new Date(iso + "T00:00:00");
+      return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    }
+
+    function filteredPosts() {
+      return POSTS.filter(p => {
+        const matchCat    = currentCat === "all" || p.category === currentCat;
+        const q           = currentSearch.toLowerCase().trim();
+        const matchSearch = !q
+          || p.title.toLowerCase().includes(q)
+          || p.excerpt.toLowerCase().includes(q)
+          || p.category.toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+    }
+
+    // ── Render ─────────────────────────────────────────────────────
+    function render() {
+      const posts   = filteredPosts();
+      const total   = posts.length;
+      const pages   = Math.max(1, Math.ceil(total / POSTS_PER_PAGE));
+      currentPage   = Math.min(currentPage, pages);
+      const start   = (currentPage - 1) * POSTS_PER_PAGE;
+      const slice   = posts.slice(start, start + POSTS_PER_PAGE);
+
+      const list     = document.getElementById("post-list");
+      const noRes    = document.getElementById("no-results");
+      const countEl  = document.getElementById("search-count");
+      const label    = document.getElementById("posts-label");
+
+      // Search count
+      if (currentSearch.trim()) {
+        countEl.textContent = `// ${total} result${total !== 1 ? "s" : ""} for "${currentSearch.trim()}"`;
+      } else {
+        countEl.textContent = "";
+      }
+
+      // Label
+      label.textContent = currentCat === "all"
+        ? `Posts (${total})`
+        : `${currentCat} (${total})`;
+
+      // Posts
+      if (slice.length === 0) {
+        list.innerHTML = "";
+        noRes.style.display = "block";
+      } else {
+        noRes.style.display = "none";
+        list.innerHTML = slice.map((p, i) => `
+          <a href="${p.slug}" class="post-item">
+            <div class="post-left">
+              <div class="post-title">${p.title}</div>
+              <div class="post-excerpt">${p.excerpt}</div>
+              <div class="post-meta">
+                <span class="post-cat">${p.category}</span>
+                <span class="post-date">${formatDate(p.date)}</span>
+                <span class="post-readtime">${p.readtime} read</span>
+              </div>
+            </div>
+            <div class="post-right">
+              <div class="post-number">${String(start + i + 1).padStart(2, "0")}</div>
+            </div>
+          </a>
+        `).join("");
+      }
+
+      // Pagination
+      renderPagination(pages, total);
+    }
+
+    function renderPagination(pages, total) {
+      const el = document.getElementById("pagination");
+      if (pages <= 1) { el.innerHTML = ""; return; }
+
+      const start = (currentPage - 1) * POSTS_PER_PAGE + 1;
+      const end   = Math.min(currentPage * POSTS_PER_PAGE, total);
+
+      let btns = "";
+      for (let i = 1; i <= pages; i++) {
+        btns += `<button class="page-btn${i === currentPage ? " current" : ""}" data-page="${i}">${i}</button>`;
+      }
+
+      el.innerHTML = `
+        <span class="page-info">${start}–${end} of ${total}</span>
+        <div class="page-controls">
+          <button class="page-btn" id="prev-btn" ${currentPage === 1 ? "disabled" : ""}>← prev</button>
+          ${btns}
+          <button class="page-btn" id="next-btn" ${currentPage === pages ? "disabled" : ""}>next →</button>
+        </div>
+      `;
+
+      document.getElementById("prev-btn").addEventListener("click", () => { currentPage--; render(); window.scrollTo(0,0); });
+      document.getElementById("next-btn").addEventListener("click", () => { currentPage++; render(); window.scrollTo(0,0); });
+      el.querySelectorAll(".page-btn[data-page]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentPage = +btn.dataset.page;
+          render();
+          window.scrollTo(0,0);
+        });
+      });
+    }
+
+    // ── Events ─────────────────────────────────────────────────────
+    document.getElementById("search-input").addEventListener("input", e => {
+      currentSearch = e.target.value;
+      currentPage   = 1;
+      render();
+    });
+
+    catRow.addEventListener("click", e => {
+      const btn = e.target.closest(".cat-btn");
+      if (!btn) return;
+      currentCat  = btn.dataset.cat;
+      currentPage = 1;
+      catRow.querySelectorAll(".cat-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      render();
+    });
+
+    // ── Init ───────────────────────────────────────────────────────
+    render();
+  </script>
 </body>
 </html>
