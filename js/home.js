@@ -32,12 +32,12 @@ const POSTS = [
     slug: "#"
   },
   {
-    title: "My Terminal Setup in 2025",
+    title: "My Terminal Setup in 2026",
     excerpt: "A walkthrough of my shell config, prompt, aliases, and the handful of CLI tools I actually reach for every day.",
     date: "2025-05-05",
     category: "Tools",
     readtime: "5 min",
-    slug: "#"
+    slug: "posts/my-terminal-setup-in-2026.html"
   },
   {
     title: "Notes on Reading Technical Papers",
