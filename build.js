@@ -22,7 +22,7 @@ const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 // TODO: set this to your real deployed site URL, e.g.
 // 'https://username.github.io/reponame' or a custom domain.
 // Required for RSS — feed readers expect absolute links, not relative ones.
-const SITE_URL = 'https://your-username.github.io/your-repo';
+const SITE_URL = 'https://plaintextlab.org';
 
 // ---------- helpers ----------------------------------------
 
@@ -215,7 +215,7 @@ function build() {
   }
 
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.md'));
-  const posts = files.map(file => {
+  const parsed = files.map(file => {
     const raw = fs.readFileSync(path.join(POSTS_DIR, file), 'utf-8');
     const { data, content } = matter(raw);
     const plain = toPlainText(content);
@@ -233,9 +233,18 @@ function build() {
       excerpt: data.excerpt || autoExcerpt(content),
       readtime: readTime(plain),
       tags: data.tags || [],
+      status: (data.status || 'published').trim().toLowerCase(),
       contentHtml: marked.parse(content),
     };
   }).filter(Boolean);
+
+  // Drafts never reach dist/, posts.json, or rss.xml — filtered out here,
+  // before sorting, prev/next linking, or page generation happen.
+  const draftCount = parsed.filter(p => p.status !== 'published').length;
+  const posts = parsed.filter(p => p.status === 'published');
+  if (draftCount > 0) {
+    console.log(`Skipped ${draftCount} draft post(s) — set status: "published" to publish.`);
+  }
 
   // Newest first
   posts.sort((a, b) => (a.date < b.date ? 1 : -1));

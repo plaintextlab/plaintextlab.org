@@ -1,7 +1,8 @@
 ---
-title: "01 - The most powerful file format"
+title: "01 - "
 date: "2026-08-12"
-category: "philosophy,minimalism"
+category: "minimalism"
+status: "draft"
 ---
 
 > A plain .txt file is almost impossible to outgrow because it doesn't depend on an app, company, operating system, subscription, database, or cloud service.
