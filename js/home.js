@@ -1,109 +1,13 @@
 /* ============================================================
    home.js — plaintextlab
-   Post data, search, category filter, and pagination
+   Post data comes from posts.json, generated at build time by
+   build.js from the markdown files in posts/. To add, edit, or
+   remove a post: touch the .md files in posts/ only — never
+   edit post data in this file.
    ============================================================ */
 
 // ── Post data ──────────────────────────────────────────────
-// To add a new post: push an object to this array.
-// Fields: title, excerpt, date (YYYY-MM-DD), category, readtime, slug
-const POSTS = [
-  {
-    title: "Why I Write in Plain Text",
-    excerpt: "Every note-taking app promises to change your life. After years of migrations and lost data, I went back to .txt files and never looked back.",
-    date: "2025-06-08",
-    category: "Tools",
-    readtime: "4 min",
-    slug: "posts/why-i-write-in-plain-text.html"
-  },
-  {
-    title: "Building a Static Blog on GitHub Pages",
-    excerpt: "No frameworks, no build step, no npm install. Just HTML, a bit of JavaScript, and a git push. Here's the full setup I use for this site.",
-    date: "2025-05-30",
-    category: "Web",
-    readtime: "6 min",
-    slug: "posts/building-a-static-blog.html"
-  },
-  {
-    title: "The Unix Philosophy, Revisited",
-    excerpt: "Write programs that do one thing well. Write programs that work together. After 50 years, this still reads like a manifesto for modern software.",
-    date: "2025-05-18",
-    category: "Essays",
-    readtime: "8 min",
-    slug: "#"
-  },
-  {
-    title: "My Terminal Setup in 2026",
-    excerpt: "A walkthrough of my shell config, prompt, aliases, and the handful of CLI tools I actually reach for every day.",
-    date: "2025-05-05",
-    category: "Tools",
-    readtime: "5 min",
-    slug: "posts/my-terminal-setup-in-2026.html"
-  },
-  {
-    title: "Notes on Reading Technical Papers",
-    excerpt: "Most papers are written for reviewers, not readers. A few tactics that help me get through them without losing the thread.",
-    date: "2025-04-22",
-    category: "Essays",
-    readtime: "5 min",
-    slug: "#"
-  },
-  {
-    title: "grep, sed, awk: A Practical Refresher",
-    excerpt: "These three tools have been on every Unix system for decades. I keep forgetting the syntax. Here's the cheat-sheet I actually use.",
-    date: "2025-04-10",
-    category: "Code",
-    readtime: "7 min",
-    slug: "#"
-  },
-  {
-    title: "Against Complexity: A Case for Boring Tech",
-    excerpt: "The best stack is often the one you already understand. A short argument for choosing boring, predictable technology over whatever is new.",
-    date: "2025-03-29",
-    category: "Essays",
-    readtime: "6 min",
-    slug: "#"
-  },
-  {
-    title: "Writing a Tiny HTTP Server in Python",
-    excerpt: "Python's stdlib http.server is underrated. In under 60 lines you can build something surprisingly capable for local dev and tooling.",
-    date: "2025-03-14",
-    category: "Code",
-    readtime: "9 min",
-    slug: "#"
-  },
-  {
-    title: "On Taking Notes While Reading",
-    excerpt: "Reading without writing is like dreaming without sleeping. Some notes on my annotation system for books and articles.",
-    date: "2025-02-28",
-    category: "Essays",
-    readtime: "4 min",
-    slug: "#"
-  },
-  {
-    title: "rsync Is All You Need",
-    excerpt: "Before reaching for a cloud sync service, consider rsync. It's fast, scriptable, and you already have it. A practical guide.",
-    date: "2025-02-10",
-    category: "Tools",
-    readtime: "5 min",
-    slug: "#"
-  },
-  {
-    title: "A Short History of Markdown",
-    excerpt: "John Gruber published Markdown in 2004 to make writing for the web feel like writing email. Twenty years later it's everywhere — and still plain text.",
-    date: "2025-01-25",
-    category: "Web",
-    readtime: "6 min",
-    slug: "#"
-  },
-  {
-    title: "CSS That Doesn't Fight You",
-    excerpt: "A few layout patterns I keep coming back to: the stack, the cluster, the repel. No frameworks required.",
-    date: "2025-01-08",
-    category: "Web",
-    readtime: "7 min",
-    slug: "#"
-  },
-];
+let POSTS = [];
 
 const POSTS_PER_PAGE = 6;
 
@@ -112,17 +16,19 @@ let currentPage   = 1;
 let currentCat    = "all";
 let currentSearch = "";
 
-// ── Build category buttons ─────────────────────────────────
-const cats   = [...new Set(POSTS.map(p => p.category))].sort();
 const catRow = document.getElementById("cat-row");
 
-cats.forEach(cat => {
-  const btn = document.createElement("button");
-  btn.className    = "cat-btn";
-  btn.dataset.cat  = cat;
-  btn.textContent  = cat;
-  catRow.appendChild(btn);
-});
+// ── Build category buttons ─────────────────────────────────
+function buildCategoryButtons() {
+  const cats = [...new Set(POSTS.map(p => p.category))].sort();
+  cats.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className    = "cat-btn";
+    btn.dataset.cat  = cat;
+    btn.textContent  = cat;
+    catRow.appendChild(btn);
+  });
+}
 
 // ── Helpers ────────────────────────────────────────────────
 function formatDate(iso) {
@@ -243,4 +149,18 @@ catRow.addEventListener("click", e => {
 });
 
 // ── Init ───────────────────────────────────────────────────
-render();
+fetch("posts.json")
+  .then(res => {
+    if (!res.ok) throw new Error("posts.json not found — did the build run?");
+    return res.json();
+  })
+  .then(data => {
+    POSTS = data;
+    buildCategoryButtons();
+    render();
+  })
+  .catch(err => {
+    document.getElementById("post-list").innerHTML =
+      `<p style="font-family: var(--mono); font-size: 12px; color: var(--muted);">${err.message}</p>`;
+    console.error(err);
+  });
