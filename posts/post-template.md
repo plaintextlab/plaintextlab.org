@@ -1,6 +1,7 @@
 ---
-title: "My First Post"
+title: "Post Title"
 date: "2026-08-12"
+category: "minimalism"
 status: "draft"
 ---
 
