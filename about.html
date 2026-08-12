@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>plaintextlab</title>
+  <title>about — plaintextlab</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
   <link rel="apple-touch-icon" href="images/favicon-180.png" />
   <link rel="stylesheet" href="css/common.css" />
-  <link rel="stylesheet" href="css/home.css" />
 </head>
 <body>
   <div class="site-wrap">
@@ -22,34 +21,21 @@
       </a>
       <p class="site-desc"># writing about code, tools, and the things in between</p>
       <nav>
-        <a href="index.html" class="active">home</a>
-        <a href="about.html">about</a>
+        <a href="index.html">home</a>
+        <a href="about.html" class="active">about</a>
         <a href="rss.xml">rss</a>
         <a href="https://www.youtube.com/@plaintextlab" target="_blank" rel="noopener">youtube</a>
         <a href="#" target="_blank" rel="noopener">github</a> <!-- TODO: replace # with your actual GitHub URL -->
       </nav>
     </header>
 
-    <div class="search-bar">
-      <span class="search-icon">/</span>
-      <input type="search" id="search-input" placeholder="search posts..." autocomplete="off" />
+    <div style="font-size: 15.5px; line-height: 1.75; color: var(--text);">
+      <p style="margin-bottom: 24px;">
+        <!-- TODO: replace with your real bio -->
+        This is a placeholder about page. Replace this paragraph with
+        who you are, what plaintextlab covers, and why you write it.
+      </p>
     </div>
-    <div id="search-count"></div>
-
-    <div class="category-row" id="cat-row">
-      <button class="cat-btn active" data-cat="all">All</button>
-    </div>
-
-    <div class="section-label" id="posts-label">Posts</div>
-
-    <div id="post-list"></div>
-
-    <div id="no-results">
-      <p class="no-res-label">// 404</p>
-      <p>No posts match your search.</p>
-    </div>
-
-    <div class="pagination" id="pagination"></div>
 
     <footer>
       <div class="footer-brand"><span>~/</span>plaintextlab</div>
@@ -60,7 +46,5 @@
     </footer>
 
   </div>
-
-  <script src="js/home.js"></script>
 </body>
 </html>

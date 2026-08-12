@@ -19,6 +19,11 @@ const POSTS_DIR  = path.join(ROOT, 'posts');
 const OUT_DIR    = path.join(ROOT, 'dist');
 const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 
+// TODO: set this to your real deployed site URL, e.g.
+// 'https://username.github.io/reponame' or a custom domain.
+// Required for RSS — feed readers expect absolute links, not relative ones.
+const SITE_URL = 'https://your-username.github.io/your-repo';
+
 // ---------- helpers ----------------------------------------
 
 function slugFromFilename(filename) {
@@ -141,6 +146,38 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
 </html>`;
 }
 
+function escapeXml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function buildRssFeed(indexEntries) {
+  const items = indexEntries.map(p => {
+    const url = `${SITE_URL}/${p.slug}`;
+    const pubDate = new Date(p.date + 'T00:00:00Z').toUTCString();
+    return `    <item>
+      <title>${escapeXml(p.title)}</title>
+      <link>${url}</link>
+      <guid>${url}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <description>${escapeXml(p.excerpt)}</description>
+    </item>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>plaintextlab</title>
+    <link>${SITE_URL}</link>
+    <description>writing about code, tools, and the things in between</description>
+${items}
+  </channel>
+</rss>
+`;
+}
+
 // ---------- build --------------------------------------------
 
 function build() {
@@ -148,7 +185,9 @@ function build() {
   fs.mkdirSync(OUT_POSTS, { recursive: true });
 
   // 1. Copy hand-written site shell into dist/
-  fs.copyFileSync(path.join(ROOT, 'index.html'), path.join(OUT_DIR, 'index.html'));
+  fs.readdirSync(ROOT)
+    .filter(f => f.endsWith('.html'))
+    .forEach(f => fs.copyFileSync(path.join(ROOT, f), path.join(OUT_DIR, f)));
   copyDir(path.join(ROOT, 'css'), path.join(OUT_DIR, 'css'));
   copyDir(path.join(ROOT, 'js'), path.join(OUT_DIR, 'js'));
   copyDir(path.join(ROOT, 'images'), path.join(OUT_DIR, 'images')); // logo, favicons
@@ -210,6 +249,10 @@ function build() {
   }));
   fs.writeFileSync(path.join(OUT_DIR, 'posts.json'), JSON.stringify(index, null, 2));
   console.log(`wrote posts.json (${index.length} posts)`);
+
+  // 4b. Write rss.xml from the same index data
+  fs.writeFileSync(path.join(OUT_DIR, 'rss.xml'), buildRssFeed(index));
+  console.log('wrote rss.xml');
 
   // 5. .nojekyll so GitHub Pages doesn't mangle dist/
   fs.writeFileSync(path.join(OUT_DIR, '.nojekyll'), '');
