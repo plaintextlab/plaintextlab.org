@@ -42,6 +42,13 @@ header.post-header-bar .cursor {
   border-bottom: 1px solid var(--border);
 }
 
+.post-cat-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
 .post-cat-tag {
   display: inline-block;
   font-family: var(--mono);
@@ -53,7 +60,6 @@ header.post-header-bar .cursor {
   border-radius: 2px;
   background: var(--accent-bg);
   color: var(--accent);
-  margin-bottom: 16px;
 }
 
 .post-title {

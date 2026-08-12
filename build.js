@@ -74,7 +74,7 @@ function copyDir(src, dest) {
 
 // ---------- post page template ------------------------------
 
-function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, prev, next }) {
+function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug }) {
   const tagsHtml = (tags || [])
     .map(t => `<span class="tag">${t}</span>`)
     .join('\n        ');
@@ -102,6 +102,7 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32.png" />
   <link rel="apple-touch-icon" href="../images/favicon-180.png" />
+  <link rel="canonical" href="${SITE_URL}/posts/${slug}.html" />
   <link rel="stylesheet" href="../css/common.css" />
   <link rel="stylesheet" href="../css/post.css" />
 </head>
@@ -119,12 +120,14 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
     </header>
 
     <div class="breadcrumb">
-      <a href="../index.html">home</a> / <span>${category}</span>
+      <a href="../index.html">home</a> / <span>${categories.join(', ')}</span>
     </div>
 
     <article>
       <div class="post-header">
-        <span class="post-cat-tag">${category}</span>
+      <div class="post-cat-tags">
+        ${categories.map(c => `<span class="post-cat-tag">${c}</span>`).join('\n        ')}
+      </div>
         <h1 class="post-title">${title}</h1>
         <div class="post-meta">
           <span>${formatDate(dateIso)}</span>
@@ -140,6 +143,8 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
         ${navHtml}
       </div>
     </article>
+
+    <p class="copyright">© 2026 plaintextlab. All content is original — please don't republish without permission.</p>
 
   </div>
 </body>
@@ -184,10 +189,16 @@ function build() {
   fs.rmSync(OUT_DIR, { recursive: true, force: true });
   fs.mkdirSync(OUT_POSTS, { recursive: true });
 
-  // 1. Copy hand-written site shell into dist/
+  // 1. Copy hand-written site shell into dist/, substituting {{SITE_URL}}
+  //    tokens (used in canonical link tags) with the real configured URL.
   fs.readdirSync(ROOT)
     .filter(f => f.endsWith('.html'))
-    .forEach(f => fs.copyFileSync(path.join(ROOT, f), path.join(OUT_DIR, f)));
+    .forEach(f => {
+      const content = fs.readFileSync(path.join(ROOT, f), 'utf-8')
+        .replace(/\{\{SITE_URL\}\}/g, SITE_URL);
+      fs.writeFileSync(path.join(OUT_DIR, f), content);
+    });
+  fs.copyFileSync(path.join(ROOT, 'robots.txt'), path.join(OUT_DIR, 'robots.txt'));
   copyDir(path.join(ROOT, 'css'), path.join(OUT_DIR, 'css'));
   copyDir(path.join(ROOT, 'js'), path.join(OUT_DIR, 'js'));
   copyDir(path.join(ROOT, 'images'), path.join(OUT_DIR, 'images')); // logo, favicons
@@ -218,7 +229,7 @@ function build() {
       slug: slugFromFilename(file),
       title: data.title,
       date: String(data.date),
-      category: data.category || 'General',
+      categories: (data.category || 'General').split(',').map(c => c.trim()).filter(Boolean),
       excerpt: data.excerpt || autoExcerpt(content),
       readtime: readTime(plain),
       tags: data.tags || [],
@@ -243,7 +254,7 @@ function build() {
     title: p.title,
     excerpt: p.excerpt,
     date: p.date,
-    category: p.category,
+    categories: p.categories,
     readtime: p.readtime,
     slug: `posts/${p.slug}.html`,
   }));

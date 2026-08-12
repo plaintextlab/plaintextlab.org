@@ -20,7 +20,7 @@ const catRow = document.getElementById("cat-row");
 
 // ── Build category buttons ─────────────────────────────────
 function buildCategoryButtons() {
-  const cats = [...new Set(POSTS.map(p => p.category))].sort();
+  const cats = [...new Set(POSTS.flatMap(p => p.categories))].sort();
   cats.forEach(cat => {
     const btn = document.createElement("button");
     btn.className    = "cat-btn";
@@ -38,12 +38,12 @@ function formatDate(iso) {
 
 function filteredPosts() {
   return POSTS.filter(p => {
-    const matchCat    = currentCat === "all" || p.category === currentCat;
+    const matchCat    = currentCat === "all" || p.categories.includes(currentCat);
     const q           = currentSearch.toLowerCase().trim();
     const matchSearch = !q
       || p.title.toLowerCase().includes(q)
       || p.excerpt.toLowerCase().includes(q)
-      || p.category.toLowerCase().includes(q);
+      || p.categories.some(c => c.toLowerCase().includes(q));
     return matchCat && matchSearch;
   });
 }
@@ -84,7 +84,7 @@ function render() {
           <div class="post-title">${p.title}</div>
           <div class="post-excerpt">${p.excerpt}</div>
           <div class="post-meta">
-            <span class="post-cat">${p.category}</span>
+            ${p.categories.map(c => `<span class="post-cat">${c}</span>`).join('')}
             <span class="post-date">${formatDate(p.date)}</span>
             <span class="post-readtime">${p.readtime} read</span>
           </div>
