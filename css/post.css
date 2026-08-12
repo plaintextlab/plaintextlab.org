@@ -84,7 +84,7 @@ header.post-header-bar .cursor {
 article {
   font-size: 15.5px;
   line-height: 1.75;
-  color: #2A2A2A;
+  color: var(--text);
 }
 
 article p { margin-bottom: 24px; }
@@ -128,6 +128,15 @@ article a {
   text-underline-offset: 3px;
 }
 
+article img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  margin: 8px 0 24px;
+  display: block;
+}
+
 article blockquote {
   margin: 28px 0;
   padding: 16px 20px;
@@ -139,7 +148,7 @@ article blockquote {
 article blockquote p {
   margin: 0;
   font-style: italic;
-  color: #444;
+  color: var(--muted);
 }
 
 article code {
@@ -153,8 +162,8 @@ article code {
 
 article pre {
   font-family: var(--mono);
-  background: #1A1A1A;
-  color: #E8E8E3;
+  background: var(--code-bg);
+  color: var(--code-fg);
   padding: 20px 24px;
   border-radius: var(--radius);
   overflow-x: auto;

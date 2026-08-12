@@ -5,6 +5,8 @@ date: "2026-08-12"
 
 This is my first post written in **Markdown**.
 
+![Screenshot of the build output](images/first-post-screenshot.png)
+
 ## Why I'm doing this
 
 Writing in Markdown means my git diffs stay readable, and the build
