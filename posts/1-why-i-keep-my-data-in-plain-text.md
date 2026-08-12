@@ -1,5 +1,5 @@
 ---
-title: "01 - "
+title: "01 - Why I Keep My Data in Plain Text ?"
 date: "2026-08-12"
 category: "minimalism"
 status: "published"

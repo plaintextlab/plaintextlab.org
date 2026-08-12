@@ -1,6 +1,7 @@
 ---
 title: "My First Post"
 date: "2026-08-12"
+status: "draft"
 ---
 
 This is my first post written in **Markdown**.
