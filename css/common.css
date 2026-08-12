@@ -6,15 +6,17 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* ── Design tokens ── */
+/* ── Design tokens: gruvbox-dark ── */
 :root {
-  --bg:        #F8F8F5;
-  --surface:   #EFEFEB;
-  --border:    #DDDDD8;
-  --muted:     #888884;
-  --text:      #1A1A1A;
-  --accent:    #2563EB;
-  --accent-bg: #EEF3FF;
+  --bg:        #282828;  /* gruvbox bg0 */
+  --surface:   #3c3836;  /* gruvbox bg1 */
+  --border:    #504945;  /* gruvbox bg2 */
+  --muted:     #a89984;  /* gruvbox fg4 / gray */
+  --text:      #ebdbb2;  /* gruvbox fg1 */
+  --accent:    #b8bb26;  /* gruvbox bright green — matches logo wordmark */
+  --accent-bg: rgba(184, 187, 38, 0.14);
+  --code-bg:   #1d2021;  /* gruvbox bg0_h — darker than page bg for contrast */
+  --code-fg:   #ebdbb2;
   --mono:      'JetBrains Mono', monospace;
   --sans:      'Inter', sans-serif;
   --radius:    4px;
@@ -53,9 +55,17 @@ header {
   color: var(--text);
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
   margin-bottom: 8px;
   text-decoration: none;
+}
+
+.site-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .site-title .prompt { color: var(--accent); }

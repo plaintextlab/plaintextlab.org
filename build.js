@@ -95,6 +95,8 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../images/favicon-32.png" />
+  <link rel="apple-touch-icon" href="../images/favicon-180.png" />
   <link rel="stylesheet" href="../css/common.css" />
   <link rel="stylesheet" href="../css/post.css" />
 </head>
@@ -103,6 +105,7 @@ function postTemplate({ title, category, dateIso, readtime, tags, contentHtml, p
 
     <header class="post-header-bar">
       <a href="../index.html" class="site-title">
+        <img src="../images/logo-icon.png" alt="plaintextlab logo" class="site-logo" />
         <span class="prompt">~/</span>plaintextlab<span class="cursor"></span>
       </a>
       <nav>
@@ -148,6 +151,12 @@ function build() {
   fs.copyFileSync(path.join(ROOT, 'index.html'), path.join(OUT_DIR, 'index.html'));
   copyDir(path.join(ROOT, 'css'), path.join(OUT_DIR, 'css'));
   copyDir(path.join(ROOT, 'js'), path.join(OUT_DIR, 'js'));
+  copyDir(path.join(ROOT, 'images'), path.join(OUT_DIR, 'images')); // logo, favicons
+
+  // 1b. Copy post images (posts/images/ -> dist/posts/images/) so relative
+  //     paths written in markdown, e.g. ![alt](images/foo.jpg), resolve
+  //     correctly against the post page's actual output location.
+  copyDir(path.join(POSTS_DIR, 'images'), path.join(OUT_POSTS, 'images'));
 
   // 2. Parse all posts
   if (!fs.existsSync(POSTS_DIR)) {
