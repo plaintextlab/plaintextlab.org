@@ -308,7 +308,7 @@ Consider how many things your computer does with information:
 | Configuration/data    | .yaml              |
 | Logs	                | .log               |
 | Automation            | .sh                |
-| Source code	        | .py, .c, .js, etc. |
+| Source code	          | .py, .c, .js, etc. |
 
 These formats have different syntax and different purposes.
 
