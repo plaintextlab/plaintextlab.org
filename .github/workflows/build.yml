@@ -14,7 +14,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4   # this public repo (build.js, css, js, index.html, etc.)
+
+      # Pull markdown posts from a SEPARATE PRIVATE repo, into ./posts/.
+      # The private repo's root should contain your *.md files and an
+      # images/ folder directly — i.e. what's currently inside posts/,
+      # without an extra posts/ wrapper folder inside it.
       - uses: actions/checkout@v4
+        with:
+          repository: plaintextlab/plaintextlab-posts
+          token: ${{ secrets.POSTS_REPO_TOKEN }}
+          path: posts
 
       - uses: actions/setup-node@v4
         with:
