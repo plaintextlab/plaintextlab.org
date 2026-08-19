@@ -22,7 +22,7 @@ const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 // TODO: set this to your real deployed site URL, e.g.
 // 'https://username.github.io/reponame' or a custom domain.
 // Required for RSS — feed readers expect absolute links, not relative ones.
-const SITE_URL = 'https://plaintextlab.org';
+const SITE_URL = 'https://your-username.github.io/your-repo';
 
 // ---------- helpers ----------------------------------------
 
@@ -74,7 +74,7 @@ function copyDir(src, dest) {
 
 // ---------- post page template ------------------------------
 
-function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug }) {
+function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug, image }) {
   const tagsHtml = (tags || [])
     .map(t => `<span class="tag">${t}</span>`)
     .join('\n        ');
@@ -135,6 +135,8 @@ function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml,
           <span>${readtime} read</span>
         </div>
       </div>
+
+      ${image ? `<img src="${image}" alt="${title}" class="post-hero-image" />` : ''}
 
       ${contentHtml}
 
@@ -231,6 +233,7 @@ function build() {
       date: String(data.date),
       categories: (data.category || 'General').split(',').map(c => c.trim()).filter(Boolean),
       excerpt: data.excerpt || autoExcerpt(content),
+      image: data.image || null,
       readtime: readTime(plain),
       tags: data.tags || [],
       status: (data.status || 'published').trim().toLowerCase(),
@@ -266,6 +269,7 @@ function build() {
     categories: p.categories,
     readtime: p.readtime,
     slug: `posts/${p.slug}.html`,
+    image: p.image ? `posts/${p.image}` : null,
   }));
   fs.writeFileSync(path.join(OUT_DIR, 'posts.json'), JSON.stringify(index, null, 2));
   console.log(`wrote posts.json (${index.length} posts)`);

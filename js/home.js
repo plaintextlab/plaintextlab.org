@@ -80,6 +80,7 @@ function render() {
     noRes.style.display = "none";
     list.innerHTML = slice.map((p, i) => `
       <a href="${p.slug}" class="post-item">
+        ${p.image ? `<div class="post-thumb"><img src="${p.image}" alt="${p.title}" loading="lazy" /></div>` : ''}
         <div class="post-left">
           <div class="post-title">${p.title}</div>
           <div class="post-excerpt">${p.excerpt}</div>
