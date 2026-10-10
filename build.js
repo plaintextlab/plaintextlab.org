@@ -22,7 +22,7 @@ const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 // TODO: set this to your real deployed site URL, e.g.
 // 'https://username.github.io/reponame' or a custom domain.
 // Required for RSS — feed readers expect absolute links, not relative ones.
-const SITE_URL = 'https://your-username.github.io/your-repo';
+const SITE_URL = 'https://plaintextlab.github.io/plaintextlab-posts';
 
 // ---------- helpers ----------------------------------------
 
@@ -70,6 +70,46 @@ function copyDir(src, dest) {
     if (entry.isDirectory()) copyDir(s, d);
     else fs.copyFileSync(s, d);
   }
+}
+
+// Turn a paragraph that contains ONLY a YouTube link into a responsive
+// 16:9 embed. Links inside a sentence are left alone as normal links.
+// Supports: watch?v=ID, youtu.be/ID, /shorts/ID, /embed/ID (+ optional t=/start=)
+const YT_PARAGRAPH = /<p>\s*<a href="(https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\/[^"]+)"[^>]*>[^<]*<\/a>\s*<\/p>/g;
+
+function youtubeEmbeds(html) {
+  return html.replace(YT_PARAGRAPH, (match, rawUrl) => {
+    let url;
+    try {
+      url = new URL(rawUrl.replace(/&amp;/g, '&'));
+    } catch {
+      return match;
+    }
+
+    let id = null;
+    if (url.hostname.endsWith('youtu.be')) {
+      id = url.pathname.slice(1);
+    } else if (url.pathname === '/watch') {
+      id = url.searchParams.get('v');
+    } else {
+      const m = url.pathname.match(/^\/(?:shorts|embed)\/([\w-]{11})/);
+      id = m ? m[1] : null;
+    }
+    if (!id || !/^[\w-]{11}$/.test(id)) return match; // playlists, channels etc. stay as links
+
+    const start = parseInt(url.searchParams.get('t') || url.searchParams.get('start') || '0', 10);
+    const qs = start > 0 ? `?start=${start}` : '';
+
+    // youtube-nocookie = no tracking cookies until the viewer presses play.
+    // Styles are inline so this works without touching post.css.
+    return `<div class="video-embed" style="position:relative;aspect-ratio:16/9;margin:24px 0;">
+  <iframe src="https://www.youtube-nocookie.com/embed/${id}${qs}"
+    title="YouTube video player" loading="lazy"
+    style="position:absolute;inset:0;width:100%;height:100%;border:0;"
+    allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>`;
+  });
 }
 
 // ---------- post page template ------------------------------
@@ -237,7 +277,7 @@ function build() {
       readtime: readTime(plain),
       tags: data.tags || [],
       status: (data.status || 'published').trim().toLowerCase(),
-      contentHtml: marked.parse(content),
+      contentHtml: youtubeEmbeds(marked.parse(content)),
     };
   }).filter(Boolean);
 
