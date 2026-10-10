@@ -22,7 +22,7 @@ const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 // TODO: set this to your real deployed site URL, e.g.
 // 'https://username.github.io/reponame' or a custom domain.
 // Required for RSS — feed readers expect absolute links, not relative ones.
-const SITE_URL = 'https://plaintextlab.github.io/plaintextlab-posts';
+const SITE_URL = 'https://your-username.github.io/your-repo';
 
 // ---------- helpers ----------------------------------------
 
@@ -114,7 +114,7 @@ function youtubeEmbeds(html) {
 
 // ---------- post page template ------------------------------
 
-function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug, image }) {
+function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug, image, showCover }) {
   const tagsHtml = (tags || [])
     .map(t => `<span class="tag">${t}</span>`)
     .join('\n        ');
@@ -176,7 +176,7 @@ function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml,
         </div>
       </div>
 
-      ${image ? `<img src="${image}" alt="${title}" class="post-hero-image" />` : ''}
+      ${image && showCover ? `<img src="${image}" alt="${title}" class="post-hero-image" />` : ''}
 
       ${contentHtml}
 
@@ -274,6 +274,9 @@ function build() {
       categories: (data.category || 'General').split(',').map(c => c.trim()).filter(Boolean),
       excerpt: data.excerpt || autoExcerpt(content),
       image: data.image || null,
+      // cover: "false" hides the hero image on the post page only.
+      // Homepage thumbnail is unaffected. Defaults to shown. Accepts "false" or false.
+      showCover: String(data.cover ?? 'true').trim().toLowerCase() !== 'false',
       readtime: readTime(plain),
       tags: data.tags || [],
       status: (data.status || 'published').trim().toLowerCase(),
