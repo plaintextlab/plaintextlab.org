@@ -326,7 +326,7 @@ function build() {
     const prev = posts[i + 1] || null; // older post
     const html = postTemplate({ ...post, dateIso: post.date, prev, next });
     fs.writeFileSync(path.join(OUT_POSTS, `${post.slug}.html`), html);
-    console.log(`built posts/${post.slug}.html`);
+    console.log(`built posts/${post.slug}.html${post.image && !post.showCover ? '  (cover hidden)' : ''}`);
   });
 
   // 4. Write posts.json — the index home.js fetches
