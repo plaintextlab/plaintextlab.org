@@ -72,6 +72,31 @@ function copyDir(src, dest) {
   }
 }
 
+// Heading ids so in-page links like [text](#section-name) can scroll.
+// marked v12 no longer adds ids automatically. Slugs follow GitHub's rules
+// (lowercase, punctuation stripped, spaces -> hyphens, duplicates get -1, -2...),
+// so a table of contents written the GitHub way just works.
+function slugify(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s/g, '-');
+}
+
+function renderMarkdown(md) {
+  const seen = new Map(); // fresh per post, so duplicate headings are only disambiguated within one post
+  const renderer = new marked.Renderer();
+  renderer.heading = (text, level, raw) => {
+    const base = slugify(raw) || 'section';
+    const n = seen.get(base) || 0;
+    seen.set(base, n + 1);
+    const id = n === 0 ? base : `${base}-${n}`;
+    return `<h${level} id="${id}">${text}</h${level}>\n`;
+  };
+  return marked.parse(md, { renderer });
+}
+
 // Turn a paragraph that contains ONLY a YouTube link into a responsive
 // 16:9 embed. Links inside a sentence are left alone as normal links.
 // Supports: watch?v=ID, youtu.be/ID, /shorts/ID, /embed/ID (+ optional t=/start=)
@@ -280,7 +305,7 @@ function build() {
       readtime: readTime(plain),
       tags: data.tags || [],
       status: (data.status || 'published').trim().toLowerCase(),
-      contentHtml: youtubeEmbeds(marked.parse(content)),
+      contentHtml: youtubeEmbeds(renderMarkdown(content)),
     };
   }).filter(Boolean);
 

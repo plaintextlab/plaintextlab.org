@@ -270,3 +270,14 @@ article hr {
   .post-title { font-size: 20px; }
   .post-nav { grid-template-columns: 1fr; }
 }
+
+/* ── In-page anchor links (table of contents) ── */
+html { scroll-behavior: smooth; }
+
+article h2,
+article h3,
+article h4 { scroll-margin-top: 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
