@@ -26,7 +26,6 @@ Each post is a single `.md` file with YAML frontmatter at the top.
 title: "Post Title"
 date: "2026-08-12"
 category: "minimalism"
-status: "draft"
 image: "images/tux.webp"
 ---
 This is my first post written in **Markdown**.
@@ -52,7 +51,6 @@ Here's a [link](https://example.com) and some `inline code`.
 | `title`    | Yes      | —             | Post title. Also used as the page `<title>` and Open Graph-style tags. |
 | `date`     | Yes      | —             | `YYYY-MM-DD`, quoted as a string.                                      |
 | `category` | No       | `"General"`   | Comma-separated for multiple: `"linux,minimalism"`. Each becomes its own filterable tag on the homepage. |
-| `status`   | No       | `"published"` | `"draft"` excludes the post entirely from the build — no HTML page, not in the post list, not in RSS. |
 | `image`    | No       | none          | Path relative to `images/` in the posts repo. Used as the homepage thumbnail and the post's hero image. |
 | `cover`    | No       | `true`         | `false` hides the hero image on the post page only (the homepage thumbnail is unaffected). Anything else, or omitting it, shows the hero image. |
 | `tags`     | No       | none          | YAML list, e.g. `["linux", "tools"]`. Rendered as tags at the bottom of the post, separate from `category`. |
@@ -60,15 +58,25 @@ Here's a [link](https://example.com) and some `inline code`.
 
 ### Directory structure (private posts repo)
 
+The **folder** decides whether a post is live. There is no `status` field.
+
 ```
 plaintextlab-posts/
 ├── images/
 │   └── tux.webp
-├── post-1.md
-└── post-2.md
+├── published/
+│   ├── post-1.md      <- built and published
+│   └── post-2.md
+└── drafts/
+    └── post-3.md      <- never built, never published
 ```
 
-Image paths in frontmatter and in-post markdown (`![alt](images/foo.png)`) are relative to this `images/` folder.
+- **Publish a post:** move its `.md` file from `drafts/` to `published/`, then push and rebuild.
+- **Unpublish a post:** move it back to `drafts/`.
+- A `.md` file left in the repo root, or in any other folder, is ignored (the build warns about root files).
+- The old `status:` frontmatter field is ignored. If a file in `published/` still has one, the build warns; it is published regardless.
+
+Image paths in frontmatter and in-post markdown (`![alt](images/foo.png)`) are relative to the `images/` folder (`published/images/` also works).
 
 ## Live site
 

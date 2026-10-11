@@ -15,7 +15,9 @@ const { marked } = require('marked');
 const matter = require('gray-matter');
 
 const ROOT       = __dirname;
-const POSTS_DIR  = path.join(ROOT, 'posts');
+const POSTS_DIR  = path.join(ROOT, 'posts');              // checkout of the private posts repo
+const PUBLISHED_DIR = path.join(POSTS_DIR, 'published');  // everything here is built and published
+const DRAFTS_DIR    = path.join(POSTS_DIR, 'drafts');     // never built, never published
 const OUT_DIR    = path.join(ROOT, 'dist');
 const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 
@@ -315,22 +317,51 @@ function build() {
   //     paths written in markdown, e.g. ![alt](images/foo.jpg), resolve
   //     correctly against the post page's actual output location.
   copyDir(path.join(POSTS_DIR, 'images'), path.join(OUT_POSTS, 'images'));
+  copyDir(path.join(PUBLISHED_DIR, 'images'), path.join(OUT_POSTS, 'images')); // optional
 
-  // 2. Parse all posts
-  if (!fs.existsSync(POSTS_DIR)) {
-    console.error('No posts/ directory found.');
+  // 2. Parse all posts. The FOLDER decides what is published:
+  //      posts/published/*.md  -> built and published
+  //      posts/drafts/*.md     -> never read, never built
+  //    The old `status:` frontmatter field is no longer used.
+  if (!fs.existsSync(PUBLISHED_DIR)) {
+    console.error(`No posts/published/ directory found (looked in ${PUBLISHED_DIR}).`);
+    console.error('Posts must now live in published/ (live) or drafts/ (hidden) in the posts repo.');
     process.exit(1);
   }
 
-  const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.md'));
-  const parsed = files.map(file => {
-    const raw = fs.readFileSync(path.join(POSTS_DIR, file), 'utf-8');
+  const mdFiles = dir => fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter(f => f.endsWith('.md'))
+    : [];
+
+  // Loud warnings for easy migration mistakes (these files are NOT built)
+  const strayRoot = mdFiles(POSTS_DIR);
+  if (strayRoot.length > 0) {
+    console.warn(`⚠ ${strayRoot.length} .md file(s) in the posts repo root are ignored: ${strayRoot.join(', ')} — move them into published/ or drafts/.`);
+  }
+  const draftFiles = mdFiles(DRAFTS_DIR);
+  if (draftFiles.length > 0) {
+    console.log(`Skipped ${draftFiles.length} draft post(s) in drafts/ — move to published/ to publish.`);
+  }
+
+  const files = mdFiles(PUBLISHED_DIR);
+  if (files.length === 0) {
+    console.warn('⚠ posts/published/ has no .md files — the site will have no posts.');
+  }
+
+  const posts = files.map(file => {
+    const raw = fs.readFileSync(path.join(PUBLISHED_DIR, file), 'utf-8');
     const { data, content } = matter(raw);
     const plain = toPlainText(content);
 
     if (!data.title || !data.date) {
       console.warn(`⚠ ${file}: missing required frontmatter (title, date) — skipping`);
       return null;
+    }
+
+    // `status` no longer has any effect. A leftover status: "draft" must not be
+    // trusted silently, because the file IS being published (it is in published/).
+    if (data.status !== undefined) {
+      console.warn(`⚠ ${file}: frontmatter "status" is ignored — this post is PUBLISHED because it is in published/. Remove the field (or move the file to drafts/).`);
     }
 
     return {
@@ -340,24 +371,15 @@ function build() {
       categories: (data.category || 'General').split(',').map(c => c.trim()).filter(Boolean),
       excerpt: data.excerpt || autoExcerpt(content),
       image: data.image || null,
-      // cover: "false" hides the hero image on the post page only.
+      // cover: false hides the hero image on the post page only.
       // Homepage thumbnail is unaffected. Defaults to shown. Accepts "false" or false.
       showCover: parseCover(data.cover, file),
       coverRaw: data.cover,
       readtime: readTime(plain),
       tags: data.tags || [],
-      status: (data.status || 'published').trim().toLowerCase(),
       contentHtml: youtubeEmbeds(renderMarkdown(content)),
     };
   }).filter(Boolean);
-
-  // Drafts never reach dist/, posts.json, or rss.xml — filtered out here,
-  // before sorting, prev/next linking, or page generation happen.
-  const draftCount = parsed.filter(p => p.status !== 'published').length;
-  const posts = parsed.filter(p => p.status === 'published');
-  if (draftCount > 0) {
-    console.log(`Skipped ${draftCount} draft post(s) — set status: "published" to publish.`);
-  }
 
   // Newest first
   posts.sort((a, b) => (a.date < b.date ? 1 : -1));
