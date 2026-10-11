@@ -54,6 +54,7 @@ Here's a [link](https://example.com) and some `inline code`.
 | `category` | No       | `"General"`   | Comma-separated for multiple: `"linux,minimalism"`. Each becomes its own filterable tag on the homepage. |
 | `status`   | No       | `"published"` | `"draft"` excludes the post entirely from the build — no HTML page, not in the post list, not in RSS. |
 | `image`    | No       | none          | Path relative to `images/` in the posts repo. Used as the homepage thumbnail and the post's hero image. |
+| `cover`    | No       | `true`         | `false` hides the hero image on the post page only (the homepage thumbnail is unaffected). Anything else, or omitting it, shows the hero image. |
 | `tags`     | No       | none          | YAML list, e.g. `["linux", "tools"]`. Rendered as tags at the bottom of the post, separate from `category`. |
 | `excerpt`  | No       | auto-generated | Overrides the auto-generated preview text (which is pulled from the text before the first heading). |
 

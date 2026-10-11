@@ -22,7 +22,7 @@ const OUT_POSTS  = path.join(OUT_DIR, 'posts');
 // TODO: set this to your real deployed site URL, e.g.
 // 'https://username.github.io/reponame' or a custom domain.
 // Required for RSS — feed readers expect absolute links, not relative ones.
-const SITE_URL = 'https://your-username.github.io/your-repo';
+const SITE_URL = 'https://plaintextlab.org';
 
 // ---------- helpers ----------------------------------------
 
@@ -72,6 +72,22 @@ function copyDir(src, dest) {
   }
 }
 
+// Parse the `cover` frontmatter flag. Tolerates quoted/unquoted booleans, any
+// casing, stray whitespace/zero-width characters and curly quotes (“false”),
+// which editors love to insert. Unknown values WARN instead of failing silently.
+function parseCover(value, file) {
+  if (value === undefined || value === null || value === '') return true; // default: show
+  const v = String(value)
+    .replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '')
+    .replace(/["'\u201C\u201D\u2018\u2019]/g, '')
+    .trim()
+    .toLowerCase();
+  if (['false', 'no', '0', 'off', 'hide', 'hidden'].includes(v)) return false;
+  if (['true', 'yes', '1', 'on', 'show'].includes(v)) return true;
+  console.warn(`⚠ ${file}: unrecognized cover value ${JSON.stringify(value)} — showing the cover. Use "true" or "false".`);
+  return true;
+}
+
 // Heading ids so in-page links like [text](#section-name) can scroll.
 // marked v12 no longer adds ids automatically. Slugs follow GitHub's rules
 // (lowercase, punctuation stripped, spaces -> hyphens, duplicates get -1, -2...),
@@ -84,9 +100,30 @@ function slugify(text) {
     .replace(/\s/g, '-');
 }
 
+function isExternalUrl(href) {
+  if (!/^https?:\/\//i.test(href || '')) return false;
+  try {
+    const host = new URL(href).hostname.replace(/^www\./, '');
+    const own  = new URL(SITE_URL).hostname.replace(/^www\./, '');
+    return host !== own;
+  } catch {
+    return false;
+  }
+}
+
 function renderMarkdown(md) {
   const seen = new Map(); // fresh per post, so duplicate headings are only disambiguated within one post
   const renderer = new marked.Renderer();
+  // Links to other sites open in a new tab. Same-site, #anchor, relative and
+  // mailto: links are left alone. The extra attributes go AFTER href so the
+  // YouTube-embed matcher (which expects `<a href=...`) still works.
+  const defaultLink = renderer.link.bind(renderer);
+  renderer.link = (href, title, text) => {
+    const html = defaultLink(href, title, text);
+    if (!isExternalUrl(href) || !html.startsWith('<a ')) return html;
+    return html.replace(/^<a ([^>]*)>/, '<a $1 target="_blank" rel="noopener noreferrer">');
+  };
+
   renderer.heading = (text, level, raw) => {
     const base = slugify(raw) || 'section';
     const n = seen.get(base) || 0;
@@ -139,7 +176,7 @@ function youtubeEmbeds(html) {
 
 // ---------- post page template ------------------------------
 
-function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug, image, showCover }) {
+function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml, prev, next, slug, image, showCover, coverRaw }) {
   const tagsHtml = (tags || [])
     .map(t => `<span class="tag">${t}</span>`)
     .join('\n        ');
@@ -201,6 +238,7 @@ function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml,
         </div>
       </div>
 
+      <!-- build: cover ${showCover ? 'shown' : 'hidden'} (frontmatter cover=${String(JSON.stringify(coverRaw)).replace(/--/g, '-')}) -->
       ${image && showCover ? `<img src="${image}" alt="${title}" class="post-hero-image" />` : ''}
 
       ${contentHtml}
@@ -214,6 +252,9 @@ function postTemplate({ title, categories, dateIso, readtime, tags, contentHtml,
     <p class="copyright">© 2026 plaintextlab. All content is original — please don't republish without permission.</p>
 
   </div>
+
+  <button type="button" id="to-top" class="to-top" aria-label="Back to top" title="Back to top">↑</button>
+  <script src="../js/post.js"></script>
 </body>
 </html>`;
 }
@@ -301,7 +342,8 @@ function build() {
       image: data.image || null,
       // cover: "false" hides the hero image on the post page only.
       // Homepage thumbnail is unaffected. Defaults to shown. Accepts "false" or false.
-      showCover: String(data.cover ?? 'true').trim().toLowerCase() !== 'false',
+      showCover: parseCover(data.cover, file),
+      coverRaw: data.cover,
       readtime: readTime(plain),
       tags: data.tags || [],
       status: (data.status || 'published').trim().toLowerCase(),
@@ -326,7 +368,7 @@ function build() {
     const prev = posts[i + 1] || null; // older post
     const html = postTemplate({ ...post, dateIso: post.date, prev, next });
     fs.writeFileSync(path.join(OUT_POSTS, `${post.slug}.html`), html);
-    console.log(`built posts/${post.slug}.html${post.image && !post.showCover ? '  (cover hidden)' : ''}`);
+    console.log(`built posts/${post.slug}.html${post.image ? `  [cover ${post.showCover ? 'SHOWN' : 'hidden'}, frontmatter cover=${JSON.stringify(post.coverRaw)}]` : ''}`);
   });
 
   // 4. Write posts.json — the index home.js fetches
