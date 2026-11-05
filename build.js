@@ -309,6 +309,8 @@ function build() {
       fs.writeFileSync(path.join(OUT_DIR, f), content);
     });
   fs.copyFileSync(path.join(ROOT, 'robots.txt'), path.join(OUT_DIR, 'robots.txt'));
+  // tuxcraft launcher: curl -fsSL https://plaintextlab.org/tuxcraft | sh  (no extension on purpose)
+  fs.copyFileSync(path.join(ROOT, 'tuxcraft'), path.join(OUT_DIR, 'tuxcraft'));
   copyDir(path.join(ROOT, 'css'), path.join(OUT_DIR, 'css'));
   copyDir(path.join(ROOT, 'js'), path.join(OUT_DIR, 'js'));
   copyDir(path.join(ROOT, 'images'), path.join(OUT_DIR, 'images')); // logo, favicons
