@@ -3,7 +3,7 @@
 # Boot an Arch, Debian live or Void ISO, connect to the internet, then run one of:
 #
 #   curl -fsSL https://plaintextlab.org/tuxcraft | sh                 (Arch)
-#   wget -qO- https://plaintextlab.org/tuxcraft | sh                  (Debian live)
+#   wget -nv -O- https://plaintextlab.org/tuxcraft | sh              (Debian live)
 #   xbps-fetch -o t https://plaintextlab.org/tuxcraft && sh t         (Void)
 #
 # This only fetches the current installer from GitHub and runs it; the installer downloads the
@@ -17,7 +17,7 @@ if command -v curl >/dev/null; then curl -fsSL -o "$f" "$url"
 elif command -v wget >/dev/null; then wget -qO "$f" "$url"
 elif command -v xbps-fetch >/dev/null; then xbps-fetch -o "$f" "$url" >/dev/null
 else echo "Need curl, wget or xbps-fetch" >&2; exit 1; fi || {
-  echo "Download failed. Connected to the internet? (Wi-Fi: iwctl on Arch, nmtui on Debian/Void)" >&2; exit 1; }
+  echo "Download failed. Connected to the internet? (Arch: iwctl; Debian live: sudo dhcpcd, Wi-Fi in the README; Void: nmtui)" >&2; exit 1; }
 # Keyboard for the questions: stdin is this script's download pipe.
 if (exec </dev/tty) 2>/dev/null; then exec sh "$f" "$@" </dev/tty; fi
 exec sh "$f" "$@"
