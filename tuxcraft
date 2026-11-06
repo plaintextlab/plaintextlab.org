@@ -17,7 +17,7 @@ if command -v curl >/dev/null; then curl -fsSL -o "$f" "$url"
 elif command -v wget >/dev/null; then wget -qO "$f" "$url"
 elif command -v xbps-fetch >/dev/null; then xbps-fetch -o "$f" "$url" >/dev/null
 else echo "Need curl, wget or xbps-fetch" >&2; exit 1; fi || {
-  echo "Download failed. Connected to the internet? (Arch: iwctl; Debian live: sudo dhcpcd, Wi-Fi in the README; Void: nmtui)" >&2; exit 1; }
+  echo "Download failed. Connected to the internet? Wi-Fi: see 'Connecting to the internet' in the README" >&2; exit 1; }
 # Keyboard for the questions: stdin is this script's download pipe.
 if (exec </dev/tty) 2>/dev/null; then exec sh "$f" "$@" </dev/tty; fi
 exec sh "$f" "$@"
